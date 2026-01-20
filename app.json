@@ -10,8 +10,10 @@
       "tsconfigPaths": true
     },
     "plugins": [
-      "expo-font"
+      "expo-font",
+      "expo-router"
     ],
+    "scheme": "gym-management-app",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",

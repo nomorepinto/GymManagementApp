@@ -21,7 +21,7 @@ export default function GymDays() {
                     {days.length > 0 ? (
                         days.map((day, index) => (
                             <View key={index} className="bg-secondarybg rounded-md p-2 mb-2 flex flex-row justify-between items-center">
-                                <Text className="font-nexaLight text-white">{day} Burat</Text>
+                                <Text className="font-nexaLight text-white">{day} Day</Text>
                                 <Pressable className="bg-primarytext active:bg-accent rounded-md p-2 w-1/8" onPress={() => handleRemoveDay(index)}><Text className="font-nexaHeavy text-white">-</Text></Pressable>
                             </View>
                         ))

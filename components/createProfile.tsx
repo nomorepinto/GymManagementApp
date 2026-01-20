@@ -5,7 +5,6 @@ import GymDays from './gymDays'
 
 export default function CreateProfile() {
 
-    const [counter, setCounter] = useState(0)
     return (
         <View className="my-auto mx-auto w-3/4 flex justify-center p-4 bg-secondarybg rounded-lg">
             <Text className="text-white text-2xl font-nexaHeavy mb-5">Create Profile</Text>
