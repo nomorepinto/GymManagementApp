@@ -4,7 +4,19 @@ module.exports = {
 
   presets: [require('nativewind/preset')],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        primarybg: '#050E3C',
+        secondarybg: '#002455',
+        primarytext: '#DC0000',
+        secondarytext: '#FF3838',
+        accent: '#808080',
+      },
+      fontFamily: {
+        nexaHeavy: ['nexa-heavy', 'sans'],
+        nexaLight: ['nexa-light', 'sans'],
+      },
+    },
   },
   plugins: [],
 };
