@@ -1,12 +1,17 @@
 import { View, Text, Pressable, TextInput } from "react-native";
+import { useRouter } from 'expo-router';
 import { useState } from 'react'
-import GymDays from './gymDays'
+import Button from '../../components/button'
+import GymDays from '../../components/gymDays'
+
 
 
 export default function CreateProfile() {
 
+    const router = useRouter();
+
     return (
-        <View className="my-auto mx-auto w-3/4 flex justify-center p-4 bg-secondarybg rounded-lg">
+        <View className="flex-1 h-full w-full flex justify-center p-4 bg-secondarybg rounded-lg">
             <Text className="text-white text-2xl font-nexaHeavy mb-5">Create Profile</Text>
             <View className="flex justify-start">
                 <Text className="text-white text-l font-nexaLight mb-2">Profile Name</Text>
@@ -19,9 +24,7 @@ export default function CreateProfile() {
             </View>
             <GymDays />
             <View className="w-full items-end">
-                <Pressable className="bg-primarytext active:bg-accent rounded-md p-2 w-1/2 items-center">
-                    <Text className="font-nexaHeavy text-white">Create</Text>
-                </Pressable>
+                <Button width="w-1/2" text="Create" onPress={() => { router.navigate('/') }} />
             </View>
         </View>
     );
