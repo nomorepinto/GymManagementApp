@@ -64,16 +64,16 @@ export default function CreateProfile() {
     }
 
     return (
-        <View className="flex-1 flex justify-center p-4 bg-secondarybg rounded-lg">
-            <Text className="text-white text-2xl font-nexaHeavy mb-5">Create Profile</Text>
+        <View className="flex-1 flex justify-center p-12 bg-secondarybg rounded-3xl">
+            <Text className="text-white text-3xl font-nexaHeavy mb-5">Create Profile</Text>
             <View className="flex justify-start">
-                <Text className="text-white text-l font-nexaLight mb-2">Profile Name</Text>
+                <Text className="text-white text-2xl font-nexaLight mb-2">Profile Name</Text>
             </View>
             <View className="flex justify-start mb-5">
-                <TextInput placeholder="Name" className="bg-white rounded-md p-2 font-nexaLight" value={profileName} onChangeText={setProfileName} />
+                <TextInput placeholder="Name" className="bg-white rounded-3xl text-lg p-5 font-nexaLight" value={profileName} onChangeText={setProfileName} />
             </View>
             <View className="flex justify-start">
-                <Text className="text-white text-l font-nexaLight mb-2">Gym Days</Text>
+                <Text className="text-white text-2xl font-nexaLight mb-2">Gym Days</Text>
             </View>
             <GymDays gymDays={gymDays} setGymDays={setGymDays} />
             <View className="w-full items-end">

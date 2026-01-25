@@ -36,13 +36,13 @@ export default function TabLayout() {
     return (
         <>
             {profileArrayExists ? (
-                <Tabs>
-                    <Tabs.Screen name="index" options={{ headerShown: false, tabBarStyle: { display: 'none' } }} />
-                    <Tabs.Screen name="createProfile" options={{ headerShown: false, tabBarStyle: { display: 'none' } }} />
+                <Tabs screenOptions={{ headerShown: false, tabBarStyle: { display: 'none' } }} >
+                    <Tabs.Screen name="index" />
+                    <Tabs.Screen name="createProfile" />
                 </Tabs>
             ) : (
-                <Tabs>
-                    <Tabs.Screen name="createProfile" options={{ headerShown: false, tabBarStyle: { display: 'none' } }} />
+                <Tabs screenOptions={{ headerShown: false, tabBarStyle: { display: 'none' } }} >
+                    <Tabs.Screen name="createProfile" />
                 </Tabs>
             )}
             <StatusBar style="auto" />
