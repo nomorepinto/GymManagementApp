@@ -1,6 +1,8 @@
 import { View, KeyboardAvoidingView, Platform, Text, ActivityIndicator, Pressable } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { LinearGradient } from 'expo-linear-gradient';
+
 
 import ExerciseToday from 'components/exerciseToday';
 import ExerciseList from 'components/exerciseListSection';
@@ -11,7 +13,7 @@ import ProfileModal from 'components/profileModal';
 
 export type exercise = {
     id: string;
-    exerciseName: string;
+    name: string;
     weight: number;
     sets: number;
     reps: number;
@@ -74,7 +76,7 @@ export default function App() {
 
     if (isLoading) {
         return (
-            <View className="flex-1 bg-primarybg justify-center items-center">
+            <View className="flex-1 bg-app-navy justify-center items-center">
                 <ActivityIndicator size="large" color="#ffffff" />
             </View>
         );
@@ -82,7 +84,7 @@ export default function App() {
 
     if (profileArray.length === 0) {
         return (
-            <View className="flex-1 bg-primarybg justify-center items-center">
+            <View className="flex-1 bg-app-navy justify-center items-center">
                 <Button width="w-1/2" text='Create First Profile' onPress={() => router.navigate('/createProfile')} />
             </View>
         );
@@ -93,7 +95,7 @@ export default function App() {
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             className="flex-1"
         >
-            <View className="flex-1 font-nexaLight bg-primarybg">
+            <LinearGradient colors={['#050E3C', '#000000']} className="flex-1 font-nexaLight">
                 <View className="flex mt-14">
                     <View className="flex flex-row mx-10 mt-5 justify-between h-12 items-center ">
                         <View className="flex items-left w-[70%]">
@@ -101,7 +103,7 @@ export default function App() {
                         </View>
 
                         <View className="flex self-end justify-end w-[30%]">
-                            <Pressable className={`bg-primarytext active:bg-accent rounded-full px-5 py-2 items-center h-full justify-center`} onPress={() => setProfileModalOpen(true)}>
+                            <Pressable className={`bg-action-red active:bg-btn-active rounded-full px-5 py-2 items-center h-full justify-center`} onPress={() => setProfileModalOpen(true)}>
                                 <Text className="font-nexaHeavy text-white text-s">Switch</Text>
                             </Pressable>
                         </View>
@@ -114,13 +116,14 @@ export default function App() {
                         <ExerciseList gymDay={selectedProfile ? selectedProfile.days[selectedProfile.currentDay] : { id: '', dayName: '', exercises: [] }} />
                     </View>
                     <View className="flex items-center mt-5 mx-10">
-                        <Pressable className={`bg-primarytext active:bg-accent rounded-full p-2 justify-center items-center w-full h-28`} onPress={() => { }}>
+                        <Pressable className={`bg-action-red active:bg-btn-active rounded-full p-2 justify-center items-center w-full h-28`} onPress={() => { }}>
                             <Text className="font-nexaHeavy text-white text-3xl">Start Workout</Text>
                         </Pressable>
                     </View>
                 </View>
-            </View>
+            </LinearGradient >
             <Button width="w-full" text='Clear All Data' onPress={clearAllData} />
         </KeyboardAvoidingView>
+
     );
 }

@@ -64,7 +64,7 @@ export default function CreateProfile() {
     }
 
     return (
-        <View className="flex-1 flex justify-center p-12 bg-secondarybg rounded-3xl">
+        <View className="flex-1 flex justify-center p-12 bg-card-navy rounded-3xl">
             <Text className="text-white text-3xl font-nexaHeavy mb-5">Create Profile</Text>
             <View className="flex justify-start">
                 <Text className="text-white text-2xl font-nexaLight mb-2">Profile Name</Text>

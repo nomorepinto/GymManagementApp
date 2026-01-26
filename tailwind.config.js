@@ -9,14 +9,17 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primarybg: '#050E3C',
-        secondarybg: '#002455',
-        thirdbg: colors.slate[800],
-        selectbg: colors.slate[900],
-        primarytext: '#DC0000',
-        secondarytext: '#FF3838',
-        accent: '#808080',
-        accent2: colors.slate[700],
+        'app-navy': '#050E3C',
+        'card-navy': '#002455',
+        'card-slate': colors.slate[800],
+        'slate-dark': colors.slate[900],
+        'action-red': '#DC0000',
+        'action-red-light': '#FF3838',
+        'btn-active': '#808080',
+        'item-active': colors.slate[700],
+        'border-slate': colors.slate[600],
+        white: '#ffffff',
+        black: '#000000',
       },
       fontFamily: {
         nexaHeavy: ['nexa-heavy', 'sans'],
