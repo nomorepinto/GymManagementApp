@@ -9,9 +9,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import type { profile, gymDay } from './index'
 
+import { LinearGradient } from 'expo-linear-gradient';
 
 export default function CreateProfile() {
-
     const router = useRouter();
 
     const [profileName, setProfileName] = useState<string>('');
@@ -24,13 +24,18 @@ export default function CreateProfile() {
                 const parsedData: profile[] = JSON.parse(existingData);
                 parsedData.push(data);
                 await AsyncStorage.setItem('profileDataArray', JSON.stringify(parsedData));
+                router.replace('/')
                 console.log('Profile saved successfully');
             } else {
                 await AsyncStorage.setItem('profileDataArray', JSON.stringify([data]));
+                router.replace('/')
                 console.log('New Profile Array created successfully');
             }
         } catch (e) {
             console.log(e);
+        } finally {
+            setProfileName('');
+            setGymDays([]);
         }
     }
 
@@ -55,7 +60,6 @@ export default function CreateProfile() {
             }
 
             await saveProfileData(newProfile);
-            router.replace('/')
 
         } catch (error) {
             console.log(error);
@@ -64,7 +68,7 @@ export default function CreateProfile() {
     }
 
     return (
-        <View className="flex-1 flex justify-center p-12 bg-card-navy rounded-3xl">
+        <LinearGradient colors={['#050E3C', '#000000']} className="flex-1 flex justify-center p-12 rounded-3xl">
             <Text className="text-white text-3xl font-nexaHeavy mb-5">Create Profile</Text>
             <View className="flex justify-start">
                 <Text className="text-white text-2xl font-nexaLight mb-2">Profile Name</Text>
@@ -79,7 +83,7 @@ export default function CreateProfile() {
             <View className="w-full items-end">
                 <Button width="w-1/2" text="Create" onPress={handleCreateProfile} />
             </View>
-        </View>
+        </LinearGradient>
     );
 }
 

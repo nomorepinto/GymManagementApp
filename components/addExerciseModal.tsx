@@ -1,5 +1,4 @@
 import { Modal, View, Text, ScrollView, Pressable, TextInput } from "react-native";
-import Button from "./button";
 import type { gymDay, exercise } from "../app/(tabs)/index";
 import * as crypto from 'expo-crypto';
 
@@ -13,6 +12,13 @@ export default function AddExerciseModal({ isOpen, onClose, gymDay, setExercise 
     const [sets, setSets] = useState('');
     const [reps, setReps] = useState('');
 
+    const clearExerciseDetails = () => {
+        setExerciseName('');
+        setWeight('');
+        setSets('');
+        setReps('');
+    }
+
     const handleAddExercise = () => {
         const newExercise: exercise = {
             id: crypto.randomUUID(),
@@ -23,6 +29,7 @@ export default function AddExerciseModal({ isOpen, onClose, gymDay, setExercise 
             restTime: 60
         }
         setExercise(newExercise);
+        clearExerciseDetails();
         onClose();
     }
 
@@ -30,32 +37,36 @@ export default function AddExerciseModal({ isOpen, onClose, gymDay, setExercise 
         <Modal animationType="slide" transparent={true} visible={isOpen}>
             <View className="flex-1 items-center justify-center">
                 <View className="w-3/4 flex rounded-3xl p-5 bg-card-navy">
-                    <View className="flex justify-end self-center">
+                    <View className="flex justify-end self-center mb-3">
                         <Text className="text-white text-2xl font-nexaHeavy">Add Exercise</Text>
                     </View>
-                    <View className="flex flex-row">
-                        <View className="flex w-1/2">
-                            <Text className="text-white text-2xl font-nexaLight">Exercise Name</Text>
+                    <View className="flex flex-col">
+                        <View className="flex w-full mb-3">
+                            <Text className="text-white text-2xl font-nexaLight mb-1">Exercise Name</Text>
                             <TextInput className="bg-white rounded-3xl text-lg p-5 font-nexaLight" value={exerciseName} onChangeText={setExerciseName} />
                         </View>
-                        <View className="flex w-1/2">
-                            <Text className="text-white text-2xl font-nexaLight">Weight</Text>
+                        <View className="flex w-full mb-3">
+                            <Text className="text-white text-2xl font-nexaLight mb-1">Weight</Text>
                             <TextInput className="bg-white rounded-3xl text-lg p-5 font-nexaLight" keyboardType="numeric" value={weight} onChangeText={setWeight} />
                         </View>
                     </View>
-                    <View className="flex flex-row">
-                        <View className="flex w-1/2">
-                            <Text className="text-white text-2xl font-nexaLight">Sets</Text>
+                    <View className="flex flex-row gap-6">
+                        <View className="flex w-[45%]">
+                            <Text className="text-white text-2xl font-nexaLight mb-1">Sets</Text>
                             <TextInput className="bg-white rounded-3xl text-lg p-5 font-nexaLight" keyboardType="numeric" value={sets} onChangeText={setSets} />
                         </View>
-                        <View className="flex w-1/2">
-                            <Text className="text-white text-2xl font-nexaLight">Reps</Text>
+                        <View className="flex w-[45%]">
+                            <Text className="text-white text-2xl font-nexaLight mb-1">Reps</Text>
                             <TextInput className="bg-white rounded-3xl text-lg p-5 font-nexaLight" keyboardType="numeric" value={reps} onChangeText={setReps} />
                         </View>
                     </View>
-                    <View className="flex justify-end items-left mt-5 self-end w-1/2">
-                        <Button width="w-1/4" text="Close" onPress={onClose} />
-                        <Button width="w-1/4" text="Save" onPress={() => { handleAddExercise(); onClose(); }} />
+                    <View className="flex flex-row justify-end items-left mt-5 self-end w-full gap-4">
+                        <Pressable className={`bg-action-red active:bg-btn-active rounded-full px-5 py-2 w-50 items-center justify-center`} onPress={onClose}>
+                            <Text className="font-nexaHeavy text-white text-2xl">Close</Text>
+                        </Pressable>
+                        <Pressable className={`bg-action-red active:bg-btn-active rounded-full px-5 py-2 w-50 items-center justify-center`} onPress={() => { handleAddExercise(); onClose(); }}>
+                            <Text className="font-nexaHeavy text-white text-2xl">Save</Text>
+                        </Pressable>
                     </View>
                 </View>
             </View>

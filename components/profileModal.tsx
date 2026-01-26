@@ -4,12 +4,12 @@ import type { profile } from "../app/(tabs)/index";
 import { useRouter } from "expo-router";
 
 
-export default function ProfileModal({ isOpen, profileArray, setSelectedProfile, onClose }: { isOpen: boolean, profileArray: profile[], setSelectedProfile: any, onClose: () => void }) {
+export default function ProfileModal({ isOpen, profileArray, setSelectedProfileId, onClose }: { isOpen: boolean, profileArray: profile[], setSelectedProfileId: any, onClose: () => void }) {
 
     const router = useRouter();
 
-    const handleSelectProfile = (profile: profile) => {
-        setSelectedProfile(profile);
+    const handleSelectProfile = (profileid: string) => {
+        setSelectedProfileId(profileid);
         onClose();
     }
 
@@ -27,8 +27,8 @@ export default function ProfileModal({ isOpen, profileArray, setSelectedProfile,
                     </View>
                     <View className="max-h-40 px-5 rounded-3xl bg-app-navy mt-5">
                         <ScrollView className="flex-grow-0 w-full">
-                            {profileArray.map((profile) => (
-                                <Pressable key={profile.id} className="flex p-2 border-b border-slate active:bg-item-active rounded-md" onPress={() => handleSelectProfile(profile)}>
+                            {profileArray.map((profile, index) => (
+                                <Pressable key={index} className="flex p-2 border-b border-slate active:bg-item-active rounded-md" onPress={() => handleSelectProfile(profile.id)}>
                                     <Text className="text-white text-2xl font-nexaLight">{profile.name} Profile</Text>
                                 </Pressable>
                             ))}

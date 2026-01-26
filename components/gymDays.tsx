@@ -15,12 +15,12 @@ export default function GymDays({ gymDays, setGymDays }: { gymDays: string[], se
     }
 
     return (
-        <View className="flex justify-start bg-app-navy rounded-3xl mb-5 p-5">
+        <View className="flex justify-start bg-card-navy rounded-3xl mb-5 p-5">
             <View className="max-h-60 mb-2">
                 <ScrollView className="flex-grow-0">
                     {gymDays.length > 0 ? (
                         gymDays.map((day, index) => (
-                            <View key={index} className="bg-card-navy rounded-3xl p-2 mb-2 flex flex-row justify-between items-center">
+                            <View key={index} className="bg-app-navy rounded-3xl p-2 mb-2 flex flex-row justify-between items-center">
                                 <Text className="font-nexaHeavy text-white text-2xl px-2">{day} Day</Text>
                                 <Button width="w-1/6" text="-" onPress={() => handleRemoveDay(index)} />
                             </View>

@@ -1,14 +1,15 @@
-import { View, KeyboardAvoidingView, Platform, Text, ActivityIndicator, Pressable } from 'react-native';
+import { View, KeyboardAvoidingView, Platform, Text, ActivityIndicator, Pressable, ScrollView } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
-
+import Animated, { useAnimatedStyle, withTiming } from 'react-native-reanimated';
 
 import ExerciseToday from 'components/exerciseToday';
 import ExerciseList from 'components/exerciseListSection';
 import Button from 'components/button';
+import AddExerciseModal from 'components/addExerciseModal';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import ProfileModal from 'components/profileModal';
 
 export type exercise = {
@@ -41,7 +42,69 @@ export default function App() {
 
     const [profileArray, setProfileArray] = useState<profile[]>([])
     const [profileModalOpen, setProfileModalOpen] = useState(false);
-    const [selectedProfile, setSelectedProfile] = useState<profile | null>(null);
+    const [selectedProfileId, setselectedProfileId] = useState<string | null>(null);
+    const [addExerciseModalOpen, setAddExerciseModalOpen] = useState(false);
+    const [dimBackground, setDimBackground] = useState(false);
+
+    const selectedProfile = useMemo(() => {
+        return profileArray.find(profile => profile.id === selectedProfileId)
+    }, [profileArray, selectedProfileId]);
+
+    const saveProfileData = async (data: profile[]) => {
+        try {
+            await AsyncStorage.setItem('profileDataArray', JSON.stringify(data));
+            console.log('Profile Updated')
+        } catch (e) {
+            console.log(e);
+        }
+    }
+
+    useFocusEffect(
+        useCallback(() => {
+            const loadProfileData = async () => {
+                try {
+                    const existingData = await AsyncStorage.getItem('profileDataArray');
+                    if (existingData) {
+                        const parsedData: profile[] = JSON.parse(existingData);
+                        setProfileArray(parsedData);
+                        setselectedProfileId(parsedData[parsedData.length - 1].id);
+                    }
+                } catch (e) {
+                    console.log(e);
+                } finally {
+                    setIsLoading(false);
+                }
+            };
+            loadProfileData();
+
+        }, [])
+    );
+
+    useEffect(() => {
+        if (!isLoading && profileArray.length === 0) {
+            router.replace('/createProfile');
+        }
+    }, [isLoading, profileArray.length]);
+
+    const dimStyle = useAnimatedStyle(() => {
+        return {
+            opacity: withTiming(dimBackground ? 0.3 : 1)
+        }
+    })
+
+    useEffect(() => {
+        if (profileModalOpen || addExerciseModalOpen) {
+            setDimBackground(true);
+        } else {
+            setDimBackground(false);
+        }
+    }, [profileModalOpen, addExerciseModalOpen]);
+
+
+
+    const activeDay = selectedProfile?.days[selectedProfile?.currentDay];
+
+
 
     const clearAllData = async () => {
         try {
@@ -54,25 +117,32 @@ export default function App() {
 
     const closeProfileModal = () => setProfileModalOpen(false);
 
-    useFocusEffect(
-        useCallback(() => {
-            const loadProfileData = async () => {
-                try {
-                    const existingData = await AsyncStorage.getItem('profileDataArray');
-                    if (existingData) {
-                        const parsedData: profile[] = JSON.parse(existingData);
-                        setProfileArray(parsedData);
-                        setSelectedProfile(parsedData[parsedData.length - 1]);
-                    }
-                } catch (e) {
-                    console.log(e);
-                } finally {
-                    setIsLoading(false);
+    //SHIT THAT CHANGES THE DATA OF THE STATE
+
+    const incrementDay = () => {
+        setProfileArray(prev => prev.map(profile => profile.id === selectedProfileId ? { ...profile, currentDay: profile.currentDay + 1 } : profile))
+        saveProfileData(profileArray);
+    }
+
+    const setExercise = (exercise: exercise) => {
+
+        const updatedProfileArray = profileArray.map(profile =>
+            profile.id === selectedProfileId ?
+                {
+                    ...profile, days: profile.days.map(day =>
+                        day.id === profile.days[profile.currentDay].id ?
+                            { ...day, exercises: [...day.exercises, exercise] }
+                            : day
+                    )
                 }
-            };
-            loadProfileData();
-        }, [])
-    );
+                : profile
+        );
+        setProfileArray(updatedProfileArray);
+        saveProfileData(updatedProfileArray);
+        console.log("Exercise Added to profile " + profileArray.find(profile => profile.id === selectedProfileId)?.name);
+    };
+
+    //BORDER
 
     if (isLoading) {
         return (
@@ -82,21 +152,13 @@ export default function App() {
         );
     }
 
-    if (profileArray.length === 0) {
-        return (
-            <View className="flex-1 bg-app-navy justify-center items-center">
-                <Button width="w-1/2" text='Create First Profile' onPress={() => router.navigate('/createProfile')} />
-            </View>
-        );
-    }
-
     return (
         <KeyboardAvoidingView
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             className="flex-1"
         >
-            <LinearGradient colors={['#050E3C', '#000000']} className="flex-1 font-nexaLight">
-                <View className="flex mt-14">
+            <LinearGradient colors={['#050E3C', '#000000']} className="flex-1 font-nexaLight h-screen">
+                <Animated.View style={dimStyle} className={`flex mt-14`}>
                     <View className="flex flex-row mx-10 mt-5 justify-between h-12 items-center ">
                         <View className="flex items-left w-[70%]">
                             <Text className="text-white text-4xl font-nexaHeavy" ellipsizeMode="tail" numberOfLines={1}>Hello {selectedProfile?.name}</Text>
@@ -108,19 +170,24 @@ export default function App() {
                             </Pressable>
                         </View>
                     </View>
-                    <ProfileModal isOpen={profileModalOpen} profileArray={profileArray} setSelectedProfile={setSelectedProfile} onClose={closeProfileModal} />
+                    <ProfileModal isOpen={profileModalOpen} profileArray={profileArray} setSelectedProfileId={setselectedProfileId} onClose={closeProfileModal} />
                     <View className="flex items-center mt-5">
-                        <ExerciseToday exercise={selectedProfile ? selectedProfile.days[selectedProfile.currentDay].dayName + ' Day' : 'No profile yet'} />
+                        <ExerciseToday exercise={activeDay?.dayName + ' Day'} />
+                        <AddExerciseModal isOpen={addExerciseModalOpen}
+                            onClose={() => setAddExerciseModalOpen(false)}
+                            gymDay={activeDay ? activeDay : { id: '', dayName: '', exercises: [] }}
+                            setExercise={setExercise}
+                        />
                     </View>
                     <View className="flex items-center mt-5 h-[60%]">
-                        <ExerciseList gymDay={selectedProfile ? selectedProfile.days[selectedProfile.currentDay] : { id: '', dayName: '', exercises: [] }} />
+                        <ExerciseList gymDay={activeDay ? activeDay : { id: '', dayName: '', exercises: [] }} setAddExerciseModalOpen={setAddExerciseModalOpen} />
                     </View>
                     <View className="flex items-center mt-5 mx-10">
                         <Pressable className={`bg-action-red active:bg-btn-active rounded-full p-2 justify-center items-center w-full h-28`} onPress={() => { }}>
                             <Text className="font-nexaHeavy text-white text-3xl">Start Workout</Text>
                         </Pressable>
                     </View>
-                </View>
+                </Animated.View>
             </LinearGradient >
             <Button width="w-full" text='Clear All Data' onPress={clearAllData} />
         </KeyboardAvoidingView>
