@@ -120,8 +120,13 @@ export default function App() {
     //SHIT THAT CHANGES THE DATA OF THE STATE
 
     const incrementDay = () => {
-        setProfileArray(prev => prev.map(profile => profile.id === selectedProfileId ? { ...profile, currentDay: profile.currentDay + 1 } : profile))
-        saveProfileData(profileArray);
+        const updatedProfileArray = profileArray.map(profile =>
+            profile.id === selectedProfileId ?
+                { ...profile, currentDay: profile.currentDay + 1 }
+                : profile
+        )
+        setProfileArray(updatedProfileArray);
+        saveProfileData(updatedProfileArray);
     }
 
     const setExercise = (exercise: exercise) => {
