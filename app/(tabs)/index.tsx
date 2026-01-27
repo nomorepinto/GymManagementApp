@@ -18,6 +18,8 @@ export type exercise = {
     weight: number;
     sets: number;
     reps: number;
+    targetWeight: number;
+    targetReps: number;
     restTime: number;
 }
 
@@ -122,7 +124,7 @@ export default function App() {
     const incrementDay = () => {
         const updatedProfileArray = profileArray.map(profile =>
             profile.id === selectedProfileId ?
-                { ...profile, currentDay: profile.currentDay + 1 }
+                { ...profile, currentDay: (profile.currentDay + 1) % profile.days.length }
                 : profile
         )
         setProfileArray(updatedProfileArray);
@@ -147,6 +149,53 @@ export default function App() {
         console.log("Exercise Added to profile " + profileArray.find(profile => profile.id === selectedProfileId)?.name);
     };
 
+    const removeExercise = (exerciseId: string) => {
+        const updatedProfileArray = profileArray.map(profile =>
+            profile.id === selectedProfileId ?
+                {
+                    ...profile, days: profile.days.map(day =>
+                        day.id === profile.days[profile.currentDay].id ?
+                            { ...day, exercises: day.exercises.filter(ex => ex.id !== exerciseId) }
+                            : day
+                    )
+                }
+                : profile
+        );
+        setProfileArray(updatedProfileArray);
+        saveProfileData(updatedProfileArray);
+        console.log("Exercise removed");
+    }
+
+    const progressExercise = (exerciseId: string) => {
+        const updatedProfileArray = profileArray.map(profile =>
+            profile.id === selectedProfileId ?
+                {
+                    ...profile, days: profile.days.map(day =>
+                        day.id === profile.days[profile.currentDay].id ?
+                            {
+                                ...day, exercises: day.exercises.map(exercise =>
+                                    exercise.id === exerciseId ?
+                                        {
+                                            ...exercise,
+                                            weight: exercise.targetWeight,
+                                            reps: exercise.targetReps,
+                                            targetWeight: exercise.weight + 2.25,
+                                            targetReps: exercise.reps + 2,
+
+                                        }
+                                        : exercise
+                                )
+                            }
+                            : day
+                    )
+                }
+                : profile
+        );
+        setProfileArray(updatedProfileArray);
+        saveProfileData(updatedProfileArray);
+        console.log("Exercise overloaded");
+    }
+
     //BORDER
 
     if (isLoading) {
@@ -163,21 +212,20 @@ export default function App() {
             className="flex-1"
         >
             <LinearGradient colors={['#050E3C', '#000000']} className="flex-1 font-nexaLight h-screen">
-                <Animated.View style={dimStyle} className={`flex mt-14`}>
-                    <View className="flex flex-row mx-10 mt-5 justify-between h-12 items-center ">
-                        <View className="flex items-left w-[70%]">
-                            <Text className="text-white text-4xl font-nexaHeavy" ellipsizeMode="tail" numberOfLines={1}>Hello {selectedProfile?.name}</Text>
+                <Animated.View style={dimStyle} className={`flex-col mt-14`}>
+                    <View className="flex flex-row mx-10 justify-between h-12 items-center ">
+                        <View className="flex items-left w-[73%]">
+                            <Text className="text-white text-4xl font-nexaHeavy" ellipsizeMode="tail" numberOfLines={1}>Hi, {selectedProfile?.name}</Text>
                         </View>
 
-                        <View className="flex self-end justify-end w-[30%]">
+                        <View className="flex self-end justify-end w-[25%]">
                             <Pressable className={`bg-action-red active:bg-btn-active rounded-full px-5 py-2 items-center h-full justify-center`} onPress={() => setProfileModalOpen(true)}>
-                                <Text className="font-nexaHeavy text-white text-s">Switch</Text>
+                                <Text className="font-nexaHeavy text-white text-sm">Switch</Text>
                             </Pressable>
                         </View>
                     </View>
-                    <ProfileModal isOpen={profileModalOpen} profileArray={profileArray} setSelectedProfileId={setselectedProfileId} onClose={closeProfileModal} />
-                    <View className="flex items-center mt-5">
-                        <ExerciseToday exercise={activeDay?.dayName + ' Day'} />
+                    <View className="flex items-center justify-center mt-5">
+                        <ExerciseToday exercise={activeDay?.dayName + ' Day'} incrementDay={incrementDay} />
                         <AddExerciseModal isOpen={addExerciseModalOpen}
                             onClose={() => setAddExerciseModalOpen(false)}
                             gymDay={activeDay ? activeDay : { id: '', dayName: '', exercises: [] }}
@@ -185,7 +233,7 @@ export default function App() {
                         />
                     </View>
                     <View className="flex items-center mt-5 h-[60%]">
-                        <ExerciseList gymDay={activeDay ? activeDay : { id: '', dayName: '', exercises: [] }} setAddExerciseModalOpen={setAddExerciseModalOpen} />
+                        <ExerciseList gymDay={activeDay ? activeDay : { id: '', dayName: '', exercises: [] }} setAddExerciseModalOpen={setAddExerciseModalOpen} removeExercise={removeExercise} />
                     </View>
                     <View className="flex items-center mt-5 mx-10">
                         <Pressable className={`bg-action-red active:bg-btn-active rounded-full p-2 justify-center items-center w-full h-28`} onPress={() => { }}>
@@ -194,6 +242,8 @@ export default function App() {
                     </View>
                 </Animated.View>
             </LinearGradient >
+            <ProfileModal isOpen={profileModalOpen} profileArray={profileArray} setSelectedProfileId={setselectedProfileId} onClose={closeProfileModal} />
+
             <Button width="w-full" text='Clear All Data' onPress={clearAllData} />
         </KeyboardAvoidingView>
 

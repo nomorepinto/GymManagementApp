@@ -68,7 +68,7 @@ export default function CreateProfile() {
     }
 
     return (
-        <LinearGradient colors={['#050E3C', '#000000']} className="flex-1 flex justify-center p-12 rounded-3xl">
+        <LinearGradient colors={['#050E3C', '#000000']} className="flex-1 flex justify-center p-8 rounded-3xl">
             <Text className="text-white text-3xl font-nexaHeavy mb-5">Create Profile</Text>
             <View className="flex justify-start">
                 <Text className="text-white text-2xl font-nexaLight mb-2">Profile Name</Text>

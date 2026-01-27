@@ -26,7 +26,9 @@ export default function AddExerciseModal({ isOpen, onClose, gymDay, setExercise 
             weight: Number(weight),
             sets: Number(sets),
             reps: Number(reps),
-            restTime: 60
+            targetReps: (Number(reps) >= 12 ? 8 : Number(reps) + 2),
+            targetWeight: Number(weight) + 2.25,
+            restTime: 150
         }
         setExercise(newExercise);
         clearExerciseDetails();
@@ -46,7 +48,7 @@ export default function AddExerciseModal({ isOpen, onClose, gymDay, setExercise 
                             <TextInput className="bg-white rounded-3xl text-lg p-5 font-nexaLight" value={exerciseName} onChangeText={setExerciseName} />
                         </View>
                         <View className="flex w-full mb-3">
-                            <Text className="text-white text-2xl font-nexaLight mb-1">Weight</Text>
+                            <Text className="text-white text-2xl font-nexaLight mb-1">Weight (kg)</Text>
                             <TextInput className="bg-white rounded-3xl text-lg p-5 font-nexaLight" keyboardType="numeric" value={weight} onChangeText={setWeight} />
                         </View>
                     </View>
