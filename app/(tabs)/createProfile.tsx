@@ -1,4 +1,4 @@
-import { View, Text, TextInput } from "react-native";
+import { View, Text, TextInput, KeyboardAvoidingView, Platform } from "react-native";
 import { useRouter } from 'expo-router';
 import * as crypto from 'expo-crypto';
 import { useState } from 'react'
@@ -11,11 +11,28 @@ import type { profile, gymDay } from './index'
 
 import { LinearGradient } from 'expo-linear-gradient';
 
+function TextBoxHelper({ label, value, setValue }: { label: string, value: any, setValue: any }) {
+    return (
+        <View className="flex flex-col w-[47%]">
+            <View className="flex justify-start">
+                <Text className="text-white text-2xl font-nexaLight mb-1">{label}</Text>
+            </View>
+            <View className="flex justify-start mb-3">
+                <TextInput placeholder={label} className="bg-white rounded-2xl text-lg px-5 py-3 font-nexaLight" value={value.toString()} onChangeText={(text) => setValue(text)} keyboardType="number-pad" />
+            </View>
+        </View>
+    )
+}
+
 export default function CreateProfile() {
     const router = useRouter();
 
     const [profileName, setProfileName] = useState<string>('');
     const [gymDays, setGymDays] = useState<string[]>([]);
+    const [defaultMinReps, setDefaultMinReps] = useState<number>(8);
+    const [defaultMaxReps, setDefaultMaxReps] = useState<number>(12);
+    const [defaultRestTime, setDefaultRestTime] = useState<number>(150);
+    const [defaultWeightIncrease, setDefaultWeightIncrease] = useState<number>(2.25);
 
     const saveProfileData = async (data: profile) => {
         try {
@@ -56,7 +73,11 @@ export default function CreateProfile() {
                 id: crypto.randomUUID(),
                 name: profileName,
                 currentDay: 0,
-                days: gymDayArray
+                days: gymDayArray,
+                defaultMinReps: Number(defaultMinReps),
+                defaultMaxReps: Number(defaultMaxReps),
+                defaultRestTime: Number(defaultRestTime),
+                defaultWeightIncrease: Number(defaultWeightIncrease)
             }
 
             await saveProfileData(newProfile);
@@ -68,22 +89,36 @@ export default function CreateProfile() {
     }
 
     return (
-        <LinearGradient colors={['#050E3C', '#000000']} className="flex-1 flex justify-center p-8 rounded-3xl">
-            <Text className="text-white text-3xl font-nexaHeavy mb-5">Create Profile</Text>
-            <View className="flex justify-start">
-                <Text className="text-white text-2xl font-nexaLight mb-2">Profile Name</Text>
-            </View>
-            <View className="flex justify-start mb-5">
-                <TextInput placeholder="Name" className="bg-white rounded-3xl text-lg p-5 font-nexaLight" value={profileName} onChangeText={setProfileName} />
-            </View>
-            <View className="flex justify-start">
-                <Text className="text-white text-2xl font-nexaLight mb-2">Gym Days</Text>
-            </View>
-            <GymDays gymDays={gymDays} setGymDays={setGymDays} />
-            <View className="w-full items-end">
-                <Button width="w-1/2" text="Create" onPress={handleCreateProfile} />
-            </View>
-        </LinearGradient>
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            className="flex-1">
+            <LinearGradient colors={['#050E3C', '#000000']} className="flex-1 flex justify-center p-8 rounded-3xl">
+                <Text className="text-white text-3xl font-nexaHeavy mb-5">Create Profile</Text>
+                <View className="flex justify-start">
+                    <Text className="text-white text-2xl font-nexaLight mb-1">Profile Name</Text>
+                </View>
+                <View className="flex justify-start mb-5">
+                    <TextInput placeholder="Name" className="bg-white rounded-2xl text-lg px-5 py-3 font-nexaLight" value={profileName} onChangeText={setProfileName} />
+                </View>
+                <View className="flex justify-start">
+                    <Text className="text-white text-2xl font-nexaLight mb-2">Gym Days</Text>
+                </View>
+                <GymDays gymDays={gymDays} setGymDays={setGymDays} />
+                <View className="w-full justify-between mb-5">
+                    <View className="flex flex-row justify-between">
+                        <TextBoxHelper label="Min Reps" value={defaultMinReps.toString()} setValue={setDefaultMinReps} />
+                        <TextBoxHelper label="Max Reps" value={defaultMaxReps.toString()} setValue={setDefaultMaxReps} />
+                    </View>
+                    <View className="flex flex-row justify-between">
+                        <TextBoxHelper label="Rest Time" value={defaultRestTime.toString()} setValue={setDefaultRestTime} />
+                        <TextBoxHelper label="Weight +" value={defaultWeightIncrease.toString()} setValue={setDefaultWeightIncrease} />
+                    </View>
+                </View>
+
+                <View className="w-full items-end">
+                    <Button width="w-1/2" text="Create" onPress={handleCreateProfile} />
+                </View>
+            </LinearGradient>
+        </KeyboardAvoidingView>
     );
 }
 

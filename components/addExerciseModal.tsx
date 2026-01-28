@@ -4,8 +4,25 @@ import * as crypto from 'expo-crypto';
 
 import { useState } from "react";
 
-
-export default function AddExerciseModal({ isOpen, onClose, gymDay, setExercise }: { isOpen: boolean, gymDay: gymDay, onClose: () => void, setExercise: any }) {
+export default function AddExerciseModal({
+    isOpen,
+    onClose,
+    gymDay,
+    setExercise,
+    defaultMinReps,
+    defaultMaxReps,
+    defaultRestTime,
+    defaultWeightIncrease,
+}: {
+    isOpen: boolean,
+    gymDay: gymDay,
+    onClose: () => void,
+    setExercise: any,
+    defaultMinReps: number,
+    defaultMaxReps: number,
+    defaultRestTime: number,
+    defaultWeightIncrease: number,
+}) {
 
     const [exerciseName, setExerciseName] = useState('');
     const [weight, setWeight] = useState('');
@@ -26,9 +43,9 @@ export default function AddExerciseModal({ isOpen, onClose, gymDay, setExercise 
             weight: Number(weight),
             sets: Number(sets),
             reps: Number(reps),
-            targetReps: (Number(reps) >= 12 ? 8 : Number(reps) + 2),
-            targetWeight: Number(weight) + 2.25,
-            restTime: 150
+            targetReps: (Number(reps) >= defaultMaxReps ? defaultMinReps : Number(reps) + 2),
+            targetWeight: Number(weight) + defaultWeightIncrease,
+            restTime: defaultRestTime
         }
         setExercise(newExercise);
         clearExerciseDetails();
