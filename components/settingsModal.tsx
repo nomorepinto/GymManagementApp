@@ -1,5 +1,5 @@
 import { Modal, View, Text, ScrollView, Pressable, TextInput } from "react-native";
-import type { profile } from "../app/(tabs)/index";
+import type { profile } from "../types";
 import * as crypto from 'expo-crypto';
 import Button from "./button";
 

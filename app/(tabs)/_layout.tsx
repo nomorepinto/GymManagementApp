@@ -8,6 +8,7 @@ export default function TabLayout() {
                 <Tabs.Screen name="index" />
                 <Tabs.Screen name="createProfile" />
                 <Tabs.Screen name="error" />
+                <Tabs.Screen name="workoutScreen" />
             </Tabs>
             <StatusBar style="auto" />
         </>

@@ -12,61 +12,7 @@ import SettingsModal from 'components/settingsModal';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import ProfileModal from 'components/profileModal';
 
-export type exercise = {
-    id: string;
-    name: string;
-    weight: number;
-    sets: number;
-    reps: number;
-    targetWeight: number;
-    targetReps: number;
-    restTime: number;
-}
-
-export type gymDay = {
-    id: string;
-    dayName: string;
-    exercises: exercise[];
-}
-
-export type profile = {
-    id: string;
-    name: string;
-    currentDay: number;
-    days: gymDay[];
-    defaultMaxReps: number;
-    defaultMinReps: number;
-    defaultRestTime: number;
-    defaultWeightIncrease: number;
-}
-
-export const DEFAULT_PROFILE: profile = {
-    id: "default-id", // Usually generated via UUID or Date.now().toString()
-    name: "New Profile",
-    currentDay: 0,
-    days: [
-        {
-            id: "day-1",
-            dayName: "Push Day",
-            exercises: [
-                {
-                    id: "ex-1",
-                    name: "Bench Press",
-                    weight: 40,
-                    sets: 3,
-                    reps: 8,
-                    targetWeight: 42.5,
-                    targetReps: 10,
-                    restTime: 180
-                }
-            ]
-        }
-    ],
-    defaultMaxReps: 12,
-    defaultMinReps: 8,
-    defaultRestTime: 150,
-    defaultWeightIncrease: 2.25,
-};
+import { exercise, gymDay, profile, DEFAULT_PROFILE } from '../../types';
 
 export default function App() {
 
@@ -292,7 +238,8 @@ export default function App() {
                         <ExerciseList gymDay={activeDay ? activeDay : { id: '', dayName: '', exercises: [] }} setAddExerciseModalOpen={setAddExerciseModalOpen} removeExercise={removeExercise} />
                     </View>
                     <View className="flex items-center mt-5 mx-10">
-                        <Pressable className={`bg-action-red active:bg-btn-active rounded-full p-2 justify-center items-center w-full h-28`} onPress={() => { }}>
+                        <Pressable className={`bg-action-red active:bg-btn-active rounded-full p-2 justify-center items-center w-full h-28`}
+                            onPress={() => router.push('/workoutScreen')}>
                             <Text className="font-nexaHeavy text-white text-3xl">Start Workout</Text>
                         </Pressable>
                     </View>

@@ -1,5 +1,5 @@
 import { Modal, View, Text, ScrollView, Pressable, TextInput } from "react-native";
-import type { gymDay, exercise } from "../app/(tabs)/index";
+import type { gymDay, exercise } from "../types";
 import * as crypto from 'expo-crypto';
 
 import { useState } from "react";

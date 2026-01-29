@@ -7,7 +7,7 @@ import Button from '../../components/button'
 import GymDays from '../../components/gymDays'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import type { profile, gymDay } from './index'
+import type { profile, gymDay } from '../../types'
 
 import { LinearGradient } from 'expo-linear-gradient';
 
@@ -77,7 +77,8 @@ export default function CreateProfile() {
                 defaultMinReps: Number(defaultMinReps),
                 defaultMaxReps: Number(defaultMaxReps),
                 defaultRestTime: Number(defaultRestTime),
-                defaultWeightIncrease: Number(defaultWeightIncrease)
+                defaultWeightIncrease: Number(defaultWeightIncrease),
+                isSelected: true
             }
 
             await saveProfileData(newProfile);

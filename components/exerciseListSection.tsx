@@ -1,5 +1,5 @@
 import { View, Text, ScrollView, Pressable } from "react-native";
-import type { exercise, gymDay } from "app/(tabs)";
+import type { exercise, gymDay } from "../types";
 import Button from "./button";
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 

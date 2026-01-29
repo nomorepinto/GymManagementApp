@@ -1,6 +1,6 @@
 import { Modal, View, Text, ScrollView, Pressable } from "react-native";
 import Button from "./button";
-import type { profile } from "../app/(tabs)/index";
+import type { profile } from "../types";
 import { useRouter } from "expo-router";
 
 
