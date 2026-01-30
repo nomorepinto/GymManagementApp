@@ -189,8 +189,8 @@ export default function App() {
                                             ...exercise,
                                             weight: exercise.targetWeight,
                                             reps: exercise.targetReps,
-                                            targetWeight: exercise.weight + 2.25,
-                                            targetReps: exercise.reps + 2,
+                                            targetWeight: exercise.weight + (selectedProfile?.defaultWeightIncrease ?? 2.25),
+                                            targetReps: exercise.targetReps + 2,
 
                                         }
                                         : exercise

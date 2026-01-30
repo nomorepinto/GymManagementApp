@@ -7,10 +7,14 @@ import { Audio } from 'expo-av';
 import { useState, useCallback, useMemo, useEffect } from "react";
 import type { profile, exercise, gymDay } from "../../types";
 import Button from 'components/button';
+import OverloadModal from 'components/overloadModal'
 
 import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
 
 function ExerciseCard({ exercise, isSelected, nextExercise, prevExercise }: { exercise: exercise, isSelected: boolean, nextExercise: any, prevExercise: any }) {
+
+    const [isOverloadModalOpen, setIsOverloadModalOpen] = useState(false);
+
     return (
         <>
             <Animated.View
@@ -54,6 +58,7 @@ function ExerciseCard({ exercise, isSelected, nextExercise, prevExercise }: { ex
                         <Text className="text-white text-4xl font-nexaHeavy">{exercise.name}</Text>
                     </Animated.View>
                 )}
+                <OverloadModal isOpen={isOverloadModalOpen} onClose={() => setIsOverloadModalOpen(false)} overloadExercise={progressExercise()} />
             </Animated.View>
         </>
     )
@@ -69,12 +74,17 @@ export default function WorkoutScreen() {
     const [exerciseArray, setExerciseArray] = useState<exercise[]>([]);
     const [currentExerciseIndex, setCurrentExerciseIndex] = useState<number>(0);
 
+
     const nextExercise = () => {
         setCurrentExerciseIndex(currentExerciseIndex >= exerciseArray.length - 1 ? currentExerciseIndex : currentExerciseIndex + 1);
     }
     const prevExercise = () => {
         setCurrentExerciseIndex(currentExerciseIndex === 0 ? currentExerciseIndex : currentExerciseIndex - 1);
     }
+
+    const selectedProfile = useMemo(() => {
+        return profileArray.find(profile => profile.id === selectedProfileId);
+    }, [profileArray, selectedProfileId]);
 
     const selectedDay = useMemo(() => {
         return profileArray.find(profile => profile.id === selectedProfileId)?.days[profileArray.find(profile => profile.id === selectedProfileId)?.currentDay ?? 0]
@@ -106,6 +116,45 @@ export default function WorkoutScreen() {
 
         }, [])
     );
+
+    const saveProfileData = async (data: profile[]) => {
+        try {
+            await AsyncStorage.setItem('profileDataArray', JSON.stringify(data));
+            console.log('Asynch Storage Profile Updated')
+        } catch (e) {
+            console.log(e);
+        }
+    }
+
+    const progressExercise = (exerciseId: string) => {
+        const updatedProfileArray = profileArray.map(profile =>
+            profile.id === selectedProfileId ?
+                {
+                    ...profile, days: profile.days.map(day =>
+                        day.id === profile.days[profile.currentDay].id ?
+                            {
+                                ...day, exercises: day.exercises.map(exercise =>
+                                    exercise.id === exerciseId ?
+                                        {
+                                            ...exercise,
+                                            weight: exercise.targetWeight,
+                                            reps: exercise.targetReps,
+                                            targetWeight: exercise.weight + (selectedProfile?.defaultWeightIncrease ?? 2.25),
+                                            targetReps: exercise.targetReps + 2,
+
+                                        }
+                                        : exercise
+                                )
+                            }
+                            : day
+                    )
+                }
+                : profile
+        );
+        setProfileArray(updatedProfileArray);
+        saveProfileData(updatedProfileArray);
+        console.log("Exercise overloaded");
+    }
 
     const setAlarm = async (seconds: number) => {
         // 1. Get the current time in milliseconds and add the 'seconds' duration.
@@ -158,6 +207,7 @@ export default function WorkoutScreen() {
                     </Pressable>
                 </View>
             </View>
+
         </LinearGradient>
     );
 }
