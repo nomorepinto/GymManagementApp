@@ -2,7 +2,8 @@ import { View, KeyboardAvoidingView, Platform, Text, ActivityIndicator, Pressabl
 import { useRouter, useFocusEffect } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
-
+import * as Notifications from 'expo-notifications';
+import { Audio } from 'expo-av';
 import { useState, useCallback, useMemo, useEffect } from "react";
 import type { profile, exercise, gymDay } from "../../types";
 import Button from 'components/button';
@@ -40,6 +41,9 @@ function ExerciseCard({ exercise, isSelected, nextExercise, prevExercise }: { ex
                                 </View>
                             </View>
                         </View>
+                        <View>
+                            <Text>This is where the alarm will be</Text>
+                        </View>
                         <View className="flex flex-row justify-between mt-2">
                             <Button width="w-[48%]" text="Previous" onPress={prevExercise} />
                             <Button width="w-[48%]" text="Next" onPress={nextExercise} />
@@ -66,10 +70,10 @@ export default function WorkoutScreen() {
     const [currentExerciseIndex, setCurrentExerciseIndex] = useState<number>(0);
 
     const nextExercise = () => {
-        setCurrentExerciseIndex(currentExerciseIndex + 1);
+        setCurrentExerciseIndex(currentExerciseIndex >= exerciseArray.length - 1 ? currentExerciseIndex : currentExerciseIndex + 1);
     }
     const prevExercise = () => {
-        setCurrentExerciseIndex(currentExerciseIndex - 1);
+        setCurrentExerciseIndex(currentExerciseIndex === 0 ? currentExerciseIndex : currentExerciseIndex - 1);
     }
 
     const selectedDay = useMemo(() => {
@@ -103,6 +107,31 @@ export default function WorkoutScreen() {
         }, [])
     );
 
+    const setAlarm = async (seconds: number) => {
+        // 1. Get the current time in milliseconds and add the 'seconds' duration.
+        // This creates a fixed point in future history.
+        const triggerTime = Date.now() + (seconds * 1000);
+
+        // 2. Save that future point to storage so if the app restarts, 
+        // it remembers when it was supposed to go off.
+        await AsyncStorage.setItem('alarm_target_time', triggerTime.toString());
+
+        // 3. Request the OS to schedule a push notification.
+        await Notifications.scheduleNotificationAsync({
+            content: {
+                title: "Time's Up!",
+                body: "Your rest period is over.",
+                sound: true, // Uses the user's default notification sound
+            },
+            // The 'trigger' tells the OS exactly how many seconds to wait.
+            trigger: {
+                type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+                seconds: seconds
+            },
+        });
+    };
+
+
     if (isLoading) {
         return (
             <View className="flex-1 bg-app-navy justify-center items-center">
@@ -113,14 +142,16 @@ export default function WorkoutScreen() {
 
     return (
         <LinearGradient colors={['#050E3C', '#000000']} className="flex-1 font-nexaLight h-screen">
-            <View className="flex flex-col mx-10 mt-16">
-                <View>
-                    {exerciseArray.map((exercise, index) => (
-                        <ExerciseCard key={index} exercise={exercise} isSelected={index === currentExerciseIndex} nextExercise={nextExercise} prevExercise={prevExercise} />
-                    ))}
+            <View className="flex flex-col mx-10 mt-20">
+                <View className="h-[80%]">
+                    <ScrollView className="flex-1">
+                        {exerciseArray.map((exercise, index) => (
+                            <ExerciseCard key={index} exercise={exercise} isSelected={index === currentExerciseIndex} nextExercise={nextExercise} prevExercise={prevExercise} />
+                        ))}
+                    </ScrollView>
                 </View>
 
-                <View className="flex items-center mt-5 mx-10">
+                <View className="flex items-center mt-5 mx-10 h-[15%]">
                     <Pressable className={`bg-action-red active:bg-btn-active rounded-full justify-center items-center w-full h-16`}
                         onPress={() => router.push('/')}>
                         <Text className="font-nexaHeavy text-white text-xl">End Workout</Text>

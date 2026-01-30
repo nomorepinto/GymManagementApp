@@ -50,7 +50,7 @@ export default function App() {
                     if (existingData) {
                         const parsedData: profile[] = JSON.parse(existingData);
                         setProfileArray(parsedData);
-                        setselectedProfileId(parsedData[parsedData.length - 1]?.id || null);
+                        setselectedProfileId(parsedData.find(profile => profile.isSelected)?.id || null);
                     }
                 } catch (e) {
                     console.log(e);
