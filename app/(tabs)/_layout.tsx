@@ -4,7 +4,15 @@ import { StatusBar } from 'expo-status-bar';
 export default function TabLayout() {
     return (
         <>
-            <Tabs screenOptions={{ headerShown: false, tabBarStyle: { display: 'none' } }} >
+            <Tabs screenOptions={{
+                animation: 'shift',
+                transitionSpec: {
+                    animation: 'timing',
+                    config: { duration: 100 },
+                },
+                headerShown: false,
+                tabBarStyle: { display: 'none' },
+            }}>
                 <Tabs.Screen name="index" />
                 <Tabs.Screen name="createProfile" />
                 <Tabs.Screen name="error" />

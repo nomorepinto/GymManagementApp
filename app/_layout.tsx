@@ -4,6 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
+import { DarkTheme, ThemeProvider, DefaultTheme } from '@react-navigation/native';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -24,11 +25,11 @@ export default function RootLayout() {
     }
 
     return (
-        <>
+        <ThemeProvider value={DarkTheme}>
             <Stack>
                 <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             </Stack>
             <StatusBar style="auto" />
-        </>
+        </ThemeProvider>
     );
 }

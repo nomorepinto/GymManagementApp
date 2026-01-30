@@ -11,6 +11,7 @@ import AddExerciseModal from 'components/addExerciseModal';
 import SettingsModal from 'components/settingsModal';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import ProfileModal from 'components/profileModal';
+import WarningModal from 'components/warningModal';
 
 import { exercise, gymDay, profile, DEFAULT_PROFILE } from '../../types';
 
@@ -26,6 +27,7 @@ export default function App() {
     const [addExerciseModalOpen, setAddExerciseModalOpen] = useState(false);
     const [dimBackground, setDimBackground] = useState(false);
     const [settingsModalOpen, setSettingsModalOpen] = useState(false);
+    const [warningModalOpen, setWarningModalOpen] = useState(false);
 
     const selectedProfile = useMemo(() => {
         return profileArray.find(profile => profile.id === selectedProfileId)
@@ -48,7 +50,7 @@ export default function App() {
                     if (existingData) {
                         const parsedData: profile[] = JSON.parse(existingData);
                         setProfileArray(parsedData);
-                        setselectedProfileId(parsedData[parsedData.length - 1].id);
+                        setselectedProfileId(parsedData[parsedData.length - 1]?.id || null);
                     }
                 } catch (e) {
                     console.log(e);
@@ -60,6 +62,22 @@ export default function App() {
 
         }, [])
     );
+
+    useEffect(() => {
+
+        if (profileArray.length === 0 || !selectedProfileId) return;
+
+        const updatedProfileArray = profileArray.map(profile => ({
+            ...profile,
+            isSelected: profile.id === selectedProfileId
+        }));
+
+        setProfileArray(updatedProfileArray);
+        saveProfileData(updatedProfileArray);
+
+        console.log(updatedProfileArray.map(profile => profile.isSelected ? (profile.name + "[selected]") : profile.name));
+
+    }, [selectedProfileId]);
 
     useEffect(() => {
         if (!isLoading && profileArray.length === 0) {
@@ -74,12 +92,12 @@ export default function App() {
     })
 
     useEffect(() => {
-        if (profileModalOpen || addExerciseModalOpen || settingsModalOpen) {
+        if (profileModalOpen || addExerciseModalOpen || settingsModalOpen || warningModalOpen) {
             setDimBackground(true);
         } else {
             setDimBackground(false);
         }
-    }, [profileModalOpen, addExerciseModalOpen, settingsModalOpen]);
+    }, [profileModalOpen, addExerciseModalOpen, settingsModalOpen, warningModalOpen]);
 
 
 
@@ -202,7 +220,6 @@ export default function App() {
         console.log("Setting updated");
     }
 
-
     //BORDER
 
     if (isLoading) {
@@ -239,7 +256,9 @@ export default function App() {
                     </View>
                     <View className="flex items-center mt-5 mx-10">
                         <Pressable className={`bg-action-red active:bg-btn-active rounded-full p-2 justify-center items-center w-full h-28`}
-                            onPress={() => router.push('/workoutScreen')}>
+                            onPress={() => {
+                                selectedProfile?.days[selectedProfile?.currentDay].exercises.length === 0 ? setWarningModalOpen(true) : router.push('/workoutScreen')
+                            }}>
                             <Text className="font-nexaHeavy text-white text-3xl">Start Workout</Text>
                         </Pressable>
                     </View>
@@ -256,6 +275,7 @@ export default function App() {
                 defaultWeightIncrease={selectedProfile?.defaultWeightIncrease ? selectedProfile.defaultWeightIncrease : 2.25}
             />
             <SettingsModal selectedProfile={selectedProfile ? selectedProfile : DEFAULT_PROFILE} updateSetting={updateSetting} isOpen={settingsModalOpen} onClose={() => setSettingsModalOpen(false)} deleteProfile={deleteProfile} />
+            <WarningModal isOpen={warningModalOpen} onClose={() => setWarningModalOpen(false)} text="Add Exercises Before Starting Workout" />
         </KeyboardAvoidingView>
 
     );
