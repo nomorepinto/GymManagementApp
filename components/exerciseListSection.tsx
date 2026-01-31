@@ -6,10 +6,13 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
 
 function ExeciseListBullet({ exercise, handleRemoveExercise }: { exercise: exercise, handleRemoveExercise: any }) {
+
+    const formatNumber = (number: number) => Number(number.toFixed(2))
+
     return (
         <View className="flex p-3 bg-slate-700 rounded-3xl mb-2">
             <View className="flex-row justify-between mb-2">
-                <Text className="text-white text-xl font-nexaHeavy mt-1 mb-1 ml-2">{exercise.weight.toPrecision(3)}kg {exercise.name}</Text>
+                <Text className="text-white text-xl font-nexaHeavy mt-1 mb-1 ml-2">{formatNumber(exercise.weight)}kg {exercise.name}</Text>
                 <Pressable className="rounded-full bg-action-red active:bg-btn-active px-8 py-0.5 items-center justify-center" onPress={() => handleRemoveExercise(exercise.id)}>
                     <Text className="text-white text-lg font-nexaBold">-</Text>
                 </Pressable>
@@ -22,12 +25,12 @@ function ExeciseListBullet({ exercise, handleRemoveExercise }: { exercise: exerc
                     <Text className="text-white text-md font-nexaLight">Reps: {exercise.reps}</Text>
                 </View>
                 <View className="rounded-full bg-slate-600 px-2 py-1 items-center justify-center">
-                    <Text className="text-white text-md font-nexaLight">Rest: {(exercise.restTime / 60).toFixed(2)} min</Text>
+                    <Text className="text-white text-md font-nexaLight">Rest: {formatNumber(exercise.restTime / 60)} min</Text>
                 </View>
             </View>
             <View className="flex-row justify-between">
                 <View className="rounded-full bg-slate-500 px-2 py-1 items-center justify-center min-w-32">
-                    <Text className="text-white text-md font-nexaLight"><MaterialCommunityIcons name="target" size={12} color="white" /> Kg: {exercise.targetWeight.toPrecision(3)}</Text>
+                    <Text className="text-white text-md font-nexaLight"><MaterialCommunityIcons name="target" size={12} color="white" /> Kg: {formatNumber(exercise.targetWeight)}</Text>
                 </View>
                 <View className="rounded-full bg-slate-500 px-2 py-1 items-center justify-center min-w-32">
                     <Text className="text-white text-md font-nexaLight"><MaterialCommunityIcons name="target" size={12} color="white" /> Reps: {exercise.targetReps}</Text>

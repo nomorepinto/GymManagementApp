@@ -34,6 +34,12 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.anonymous.GymManagementApp"
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "1a4a79af-febe-4fad-b71d-5191a2c28a65"
+      }
     }
   }
 }
