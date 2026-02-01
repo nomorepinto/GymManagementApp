@@ -2,7 +2,7 @@ import { View, Text, TextInput, KeyboardAvoidingView, Platform } from "react-nat
 import { useRouter } from 'expo-router';
 import * as crypto from 'expo-crypto';
 import { useState } from 'react'
-
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import Button from '../../components/button'
 import GymDays from '../../components/gymDays'
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -33,6 +33,22 @@ export default function CreateProfile() {
     const [defaultMaxReps, setDefaultMaxReps] = useState<number>(12);
     const [defaultRestTime, setDefaultRestTime] = useState<number>(150);
     const [defaultWeightIncrease, setDefaultWeightIncrease] = useState<number>(2.25);
+
+    const checkProfileArray = async () => {
+        try {
+            const existingData = await AsyncStorage.getItem('profileDataArray');
+            if (existingData) {
+                const parsedData: profile[] = JSON.parse(existingData);
+                if (parsedData.length > 0) {
+                    return true;
+                }
+            }
+            return false;
+        } catch (e) {
+            console.log(e);
+            return false;
+        }
+    }
 
     const saveProfileData = async (data: profile) => {
         try {
@@ -76,8 +92,6 @@ export default function CreateProfile() {
                 days: gymDayArray,
                 defaultMinReps: Number(defaultMinReps),
                 defaultMaxReps: Number(defaultMaxReps),
-                defaultRestTime: Number(defaultRestTime),
-                defaultWeightIncrease: Number(defaultWeightIncrease),
                 isSelected: true
             }
 
@@ -90,8 +104,14 @@ export default function CreateProfile() {
     }
 
     return (
-        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            className="flex-1">
+        <KeyboardAwareScrollView
+            contentContainerStyle={{
+                flexGrow: 1,
+            }}
+            enableOnAndroid={true}
+            extraScrollHeight={20}
+            keyboardShouldPersistTaps="handled"
+        >
             <LinearGradient colors={['#050E3C', '#000000']} className="flex-1 flex justify-center p-8 rounded-3xl">
                 <Text className="text-white text-3xl font-nexaHeavy mb-5">Create Profile</Text>
                 <View className="flex justify-start">
@@ -109,17 +129,13 @@ export default function CreateProfile() {
                         <TextBoxHelper label="Min Reps" value={defaultMinReps.toString()} setValue={setDefaultMinReps} />
                         <TextBoxHelper label="Max Reps" value={defaultMaxReps.toString()} setValue={setDefaultMaxReps} />
                     </View>
-                    <View className="flex flex-row justify-between">
-                        <TextBoxHelper label="Rest Time" value={defaultRestTime.toString()} setValue={setDefaultRestTime} />
-                        <TextBoxHelper label="Weight +" value={defaultWeightIncrease.toString()} setValue={setDefaultWeightIncrease} />
-                    </View>
                 </View>
-
-                <View className="w-full items-end">
-                    <Button width="w-1/2" text="Create" onPress={handleCreateProfile} />
+                <View className="flex flex-row gap-6 w-full justify-between items-end">
+                    <Button width="w-[45%]" text="Cancel" onPress={async () => { await checkProfileArray() ? router.replace('/') : null }} />
+                    <Button width="w-[45%]" text="Create" onPress={handleCreateProfile} />
                 </View>
             </LinearGradient>
-        </KeyboardAvoidingView>
+        </KeyboardAwareScrollView>
     );
 }
 

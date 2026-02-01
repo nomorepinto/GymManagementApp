@@ -7,6 +7,8 @@ export type exercise = {
     targetWeight: number;
     targetReps: number;
     restTime: number;
+    weightIncrease: number;
+    history: (exercise & { date: string })[];
 }
 
 export type gymDay = {
@@ -22,9 +24,20 @@ export type profile = {
     days: gymDay[];
     defaultMaxReps: number;
     defaultMinReps: number;
-    defaultRestTime: number;
-    defaultWeightIncrease: number;
     isSelected: boolean;
+}
+
+export const DEFAULT_EXERCISE: exercise = {
+    id: "default-id", // Usually generated via UUID or Date.now().toString()
+    name: "New Exercise",
+    weight: 40,
+    sets: 3,
+    reps: 8,
+    targetWeight: 42.5,
+    targetReps: 10,
+    restTime: 180,
+    weightIncrease: 2.25,
+    history: []
 }
 
 export const DEFAULT_PROFILE: profile = {
@@ -44,14 +57,14 @@ export const DEFAULT_PROFILE: profile = {
                     reps: 8,
                     targetWeight: 42.5,
                     targetReps: 10,
-                    restTime: 180
+                    restTime: 180,
+                    weightIncrease: 2.25,
+                    history: []
                 }
             ]
         }
     ],
     defaultMaxReps: 12,
     defaultMinReps: 8,
-    defaultRestTime: 150,
-    defaultWeightIncrease: 2.25,
     isSelected: false,
 };

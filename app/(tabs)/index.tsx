@@ -6,14 +6,25 @@ import Animated, { useAnimatedStyle, withTiming } from 'react-native-reanimated'
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import ExerciseToday from 'components/exerciseToday';
 import ExerciseList from 'components/exerciseListSection';
-import Button from 'components/button';
 import AddExerciseModal from 'components/addExerciseModal';
 import SettingsModal from 'components/settingsModal';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import ProfileModal from 'components/profileModal';
 import WarningModal from 'components/warningModal';
+import ExerciseSettingsModal from 'components/exerciseSettingsModal';
+import { DEFAULT_EXERCISE } from 'types';
+
 
 import { exercise, gymDay, profile, DEFAULT_PROFILE } from '../../types';
+
+export async function saveProfileData(data: profile[]) {
+    try {
+        await AsyncStorage.setItem('profileDataArray', JSON.stringify(data));
+        console.log('Asynch Storage Profile Updated')
+    } catch (e) {
+        console.log(e);
+    }
+}
 
 export default function App() {
 
@@ -28,19 +39,14 @@ export default function App() {
     const [dimBackground, setDimBackground] = useState(false);
     const [settingsModalOpen, setSettingsModalOpen] = useState(false);
     const [warningModalOpen, setWarningModalOpen] = useState(false);
+    const [exerciseSettingsModalOpen, setExerciseSettingsModalOpen] = useState(false);
+    const [selectedExercise, setSelectedExercise] = useState<exercise | null>(null);
 
     const selectedProfile = useMemo(() => {
         return profileArray.find(profile => profile.id === selectedProfileId)
     }, [profileArray, selectedProfileId]);
 
-    const saveProfileData = async (data: profile[]) => {
-        try {
-            await AsyncStorage.setItem('profileDataArray', JSON.stringify(data));
-            console.log('Asynch Storage Profile Updated')
-        } catch (e) {
-            console.log(e);
-        }
-    }
+
 
     useFocusEffect(
         useCallback(() => {
@@ -92,12 +98,12 @@ export default function App() {
     })
 
     useEffect(() => {
-        if (profileModalOpen || addExerciseModalOpen || settingsModalOpen || warningModalOpen) {
+        if (profileModalOpen || addExerciseModalOpen || settingsModalOpen || warningModalOpen || exerciseSettingsModalOpen) {
             setDimBackground(true);
         } else {
             setDimBackground(false);
         }
-    }, [profileModalOpen, addExerciseModalOpen, settingsModalOpen, warningModalOpen]);
+    }, [profileModalOpen, addExerciseModalOpen, settingsModalOpen, warningModalOpen, exerciseSettingsModalOpen]);
 
 
 
@@ -117,6 +123,29 @@ export default function App() {
     const closeProfileModal = () => setProfileModalOpen(false);
 
     //SHIT THAT CHANGES THE DATA OF THE STATE
+
+    const updateExercise = (exerciseid: string, key: string, value: any, isString: boolean) => {
+        const updatedProfileArray = profileArray.map(profile =>
+            profile.id === selectedProfileId ?
+                {
+                    ...profile,
+                    days: profile.days.map(day =>
+                        day.id === profile.days[profile.currentDay].id ?
+                            {
+                                ...day,
+                                exercises: day.exercises.map(exercise =>
+                                    exercise.id === exerciseid ? { ...exercise, [key]: isString ? String(value) : Number(value) } : exercise
+                                )
+                            }
+                            : day
+                    )
+                }
+                : profile
+        )
+        setProfileArray(updatedProfileArray);
+        saveProfileData(updatedProfileArray);
+        console.log("Exercise Setting Updated")
+    }
 
     const deleteProfile = () => {
         if (profileArray.length <= 1) {
@@ -176,36 +205,6 @@ export default function App() {
         console.log("Exercise removed");
     }
 
-    const progressExercise = (exerciseId: string) => {
-        const updatedProfileArray = profileArray.map(profile =>
-            profile.id === selectedProfileId ?
-                {
-                    ...profile, days: profile.days.map(day =>
-                        day.id === profile.days[profile.currentDay].id ?
-                            {
-                                ...day, exercises: day.exercises.map(exercise =>
-                                    exercise.id === exerciseId ?
-                                        {
-                                            ...exercise,
-                                            weight: exercise.targetWeight,
-                                            reps: exercise.targetReps,
-                                            targetWeight: exercise.weight + (selectedProfile?.defaultWeightIncrease ?? 2.25),
-                                            targetReps: exercise.targetReps + 2,
-
-                                        }
-                                        : exercise
-                                )
-                            }
-                            : day
-                    )
-                }
-                : profile
-        );
-        setProfileArray(updatedProfileArray);
-        saveProfileData(updatedProfileArray);
-        console.log("Exercise overloaded");
-    }
-
     const updateSetting = (key: string, settingValue: number) => {
         const updatedProfileArray = profileArray.map(profile =>
             profile.id === selectedProfileId ?
@@ -231,52 +230,45 @@ export default function App() {
     }
 
     return (
-        <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            className="flex-1"
-        >
-            <LinearGradient colors={['#050E3C', '#000000']} className="flex-1 font-nexaLight h-screen">
-                <Animated.View style={dimStyle} className={`flex-col mt-14`}>
-                    <View className="flex flex-row mx-10 justify-between h-12 items-center ">
-                        <Pressable className="flex items-left w-[84%]" onPress={() => setProfileModalOpen(true)}>
-                            <Text className="text-white text-4xl font-nexaHeavy" ellipsizeMode="tail" numberOfLines={1}>Hi, {selectedProfile?.name}</Text>
-                        </Pressable>
+        <LinearGradient colors={['#050E3C', '#000000']} className="flex-1 font-nexaLight h-screen">
+            <Animated.View style={dimStyle} className={`flex-col mt-14`}>
+                <View className="flex flex-row mx-10 justify-between h-12 items-center ">
+                    <Pressable className="flex items-left w-[84%]" onPress={() => setProfileModalOpen(true)}>
+                        <Text className="text-white text-4xl font-nexaHeavy" ellipsizeMode="tail" numberOfLines={1}>Hi, {selectedProfile?.name}</Text>
+                    </Pressable>
 
-                        <View className="flex self-end justify-end w-[14%]">
-                            <Pressable className={`bg-action-red active:bg-btn-active rounded-full px-2 py-2 items-center h-full justify-center`} onPress={() => setSettingsModalOpen(true)}>
-                                <Text className="font-nexaHeavy text-white text-sm"><FontAwesome name="gear" size={20} color="white" /></Text>
-                            </Pressable>
-                        </View>
-                    </View>
-                    <View className="flex items-center justify-center mt-5">
-                        <ExerciseToday exercise={activeDay?.dayName + ' Day'} incrementDay={incrementDay} />
-                    </View>
-                    <View className="flex items-center mt-5 h-[60%]">
-                        <ExerciseList gymDay={activeDay ? activeDay : { id: '', dayName: '', exercises: [] }} setAddExerciseModalOpen={setAddExerciseModalOpen} removeExercise={removeExercise} />
-                    </View>
-                    <View className="flex items-center mt-5 mx-10">
-                        <Pressable className={`bg-action-red active:bg-btn-active rounded-full p-2 justify-center items-center w-full h-28`}
-                            onPress={() => {
-                                selectedProfile?.days[selectedProfile?.currentDay].exercises.length === 0 ? setWarningModalOpen(true) : router.push('/workoutScreen')
-                            }}>
-                            <Text className="font-nexaHeavy text-white text-3xl">Start Workout</Text>
+                    <View className="flex self-end justify-end w-[14%]">
+                        <Pressable className={`bg-action-red active:bg-btn-active rounded-full px-2 py-2 items-center h-full justify-center`} onPress={() => setSettingsModalOpen(true)}>
+                            <Text className="font-nexaHeavy text-white text-sm"><FontAwesome name="gear" size={20} color="white" /></Text>
                         </Pressable>
                     </View>
-                </Animated.View>
-            </LinearGradient >
+                </View>
+                <View className="flex items-center justify-center mt-5">
+                    <ExerciseToday exercise={activeDay?.dayName + ' Day'} incrementDay={incrementDay} />
+                </View>
+                <View className="flex items-center mt-5 h-[60%]">
+                    <ExerciseList gymDay={activeDay ? activeDay : { id: '', dayName: '', exercises: [] }} setAddExerciseModalOpen={setAddExerciseModalOpen} removeExercise={removeExercise} setSelectedExercise={setSelectedExercise} setExerciseSettingsModalOpen={setExerciseSettingsModalOpen} />
+                </View>
+                <View className="flex items-center mt-5 mx-10">
+                    <Pressable className={`bg-action-red active:bg-btn-active rounded-full p-2 justify-center items-center w-full h-28`}
+                        onPress={() => {
+                            selectedProfile?.days[selectedProfile?.currentDay].exercises.length === 0 ? setWarningModalOpen(true) : router.push('/workoutScreen')
+                        }}>
+                        <Text className="font-nexaHeavy text-white text-3xl">Start Workout</Text>
+                    </Pressable>
+                </View>
+            </Animated.View>
             <ProfileModal isOpen={profileModalOpen} profileArray={profileArray} setSelectedProfileId={setselectedProfileId} onClose={closeProfileModal} />
             <AddExerciseModal isOpen={addExerciseModalOpen}
                 onClose={() => setAddExerciseModalOpen(false)}
-                gymDay={activeDay ? activeDay : { id: '', dayName: '', exercises: [] }}
                 setExercise={setExercise}
                 defaultMinReps={selectedProfile?.defaultMinReps ? selectedProfile.defaultMinReps : 8}
                 defaultMaxReps={selectedProfile?.defaultMaxReps ? selectedProfile.defaultMaxReps : 12}
-                defaultRestTime={selectedProfile?.defaultRestTime ? selectedProfile.defaultRestTime : 150}
-                defaultWeightIncrease={selectedProfile?.defaultWeightIncrease ? selectedProfile.defaultWeightIncrease : 2.25}
             />
             <SettingsModal selectedProfile={selectedProfile ? selectedProfile : DEFAULT_PROFILE} updateSetting={updateSetting} isOpen={settingsModalOpen} onClose={() => setSettingsModalOpen(false)} deleteProfile={deleteProfile} />
             <WarningModal isOpen={warningModalOpen} onClose={() => setWarningModalOpen(false)} text="Add Exercises Before Starting Workout" />
-        </KeyboardAvoidingView>
+            <ExerciseSettingsModal isOpen={exerciseSettingsModalOpen} onClose={() => setExerciseSettingsModalOpen(false)} exercise={selectedExercise ?? DEFAULT_EXERCISE} updateExercise={updateExercise} />
+        </LinearGradient >
 
     );
 }

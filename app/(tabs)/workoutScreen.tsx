@@ -2,12 +2,11 @@ import { View, KeyboardAvoidingView, Platform, Text, ActivityIndicator, Pressabl
 import { useRouter, useFocusEffect } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
-import * as Notifications from 'expo-notifications';
-import { Audio } from 'expo-av';
 import { useState, useCallback, useMemo, useEffect } from "react";
 import type { profile, exercise, gymDay } from "../../types";
 import Button from 'components/button';
-import OverloadModal from 'components/overloadModal'
+import { saveProfileData } from './index';
+
 
 import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
 
@@ -16,11 +15,10 @@ interface ExerciseCardProps {
     isSelected: boolean;
     nextExercise: any;
     selectExercise: any;
-    incrementExerciseLimit: any;
     progressExercise: any;
 }
 
-function ExerciseCard({ exercise, isSelected, nextExercise, selectExercise, incrementExerciseLimit, progressExercise }: ExerciseCardProps) {
+function ExerciseCard({ exercise, isSelected, nextExercise, selectExercise, progressExercise }: ExerciseCardProps) {
 
     const formatNumber = (number: number) => Number(number.toFixed(2))
 
@@ -63,8 +61,8 @@ function ExerciseCard({ exercise, isSelected, nextExercise, selectExercise, incr
                             </View>
                         </View>
                         <View className="flex flex-row justify-between mt-2">
-                            <Button width="w-[48%]" text="Failed" onPress={() => { incrementExerciseLimit(); nextExercise(); setIsCompleted(true) }} />
-                            <Button width="w-[48%]" text="Completed" onPress={() => { incrementExerciseLimit(); nextExercise(); progressExercise(exercise.id); setIsCompleted(true) }} />
+                            <Button width="w-[48%]" text="Failed" onPress={() => { nextExercise(); setIsCompleted(true) }} />
+                            <Button width="w-[48%]" text="Completed" onPress={() => { nextExercise(); progressExercise(exercise.id); setIsCompleted(true) }} />
                         </View>
                     </Animated.View>
                 ) : (
@@ -90,17 +88,9 @@ export default function WorkoutScreen() {
     const [selectedProfileId, setselectedProfileId] = useState<string | null>(null);
     const [exerciseArray, setExerciseArray] = useState<exercise[]>([]);
     const [currentExerciseIndex, setCurrentExerciseIndex] = useState<number>(0);
-    const [currentExerciseLimit, setCurrentExerciseLimit] = useState<number>(0);
-
-    const incrementExerciseLimit = () => {
-        setCurrentExerciseLimit(currentExerciseLimit + 1);
-    }
 
     const nextExercise = () => {
         setCurrentExerciseIndex(currentExerciseIndex >= exerciseArray.length - 1 ? currentExerciseIndex : currentExerciseIndex + 1);
-    }
-    const prevExercise = () => {
-        setCurrentExerciseIndex(currentExerciseIndex === currentExerciseLimit ? currentExerciseIndex : currentExerciseIndex - 1);
     }
 
     const selectExercise = (index: number) => {
@@ -143,41 +133,35 @@ export default function WorkoutScreen() {
         }, [])
     );
 
-    const saveProfileData = async (data: profile[]) => {
-        try {
-            await AsyncStorage.setItem('profileDataArray', JSON.stringify(data));
-            console.log('Asynch Storage Profile Updated')
-        } catch (e) {
-            console.log(e);
-        }
-    }
-
     const progressExercise = (exerciseId: string) => {
-        const updatedDay = {
-            ...selectedDay,
-            exercises: selectedDay?.exercises.map(exercise =>
-                exercise.id === exerciseId ?
-                    {
-                        ...exercise,
-                        weight: exercise.targetWeight,
-                        reps: exercise.targetReps,
-                        targetWeight: exercise.weight + (selectedProfile?.defaultWeightIncrease ?? 2.25),
-                        targetReps: exercise.targetReps + 2,
-                    }
-                    : exercise
-            )
-        }
         const updatedProfileArray = profileArray.map(profile =>
             profile.id === selectedProfileId ?
                 {
-                    ...profile,
-                    days: profile.days.map((day, index) =>
-                        index === profile.currentDay ? updatedDay : day
+                    ...profile, days: profile.days.map(day =>
+                        day.id === profile.days[profile.currentDay].id ?
+                            {
+                                ...day, exercises: day.exercises.map(exercise =>
+                                    exercise.id === exerciseId ?
+                                        {
+                                            ...exercise,
+                                            history: [...exercise.history, { ...exercise, history: [], date: new Date(Date.now()).toLocaleDateString("en-GB") }],
+                                            weight: exercise.targetWeight,
+                                            reps: exercise.targetReps,
+                                            targetReps: (exercise.targetReps >= (selectedProfile?.defaultMaxReps ?? 12) ? (selectedProfile?.defaultMinReps ?? 8) : exercise.targetReps + 2),
+                                            targetWeight: (exercise.targetReps >= (selectedProfile?.defaultMaxReps ?? 12) ? (exercise.targetWeight + (exercise.weightIncrease ?? 2.25)) : exercise.targetWeight),
+
+                                        }
+                                        : exercise
+                                )
+                            }
+                            : day
                     )
-                } :
-                profile
+                }
+                : profile
         );
-        saveProfileData(updatedProfileArray as profile[]);
+        setProfileArray(updatedProfileArray);
+        saveProfileData(updatedProfileArray);
+        console.log(profileArray.find(profile => profile.id === selectedProfileId)?.days[profileArray.find(profile => profile.id === selectedProfileId)?.currentDay ?? 0].exercises.find(exercise => exercise.id === exerciseId)?.name + " overloaded");
     }
 
     const handleEndWorkout = () => {
@@ -187,31 +171,6 @@ export default function WorkoutScreen() {
         setProfileArray([]);
         setselectedProfileId(null);
     }
-
-    const setAlarm = async (seconds: number) => {
-        // 1. Get the current time in milliseconds and add the 'seconds' duration.
-        // This creates a fixed point in future history.
-        const triggerTime = Date.now() + (seconds * 1000);
-
-        // 2. Save that future point to storage so if the app restarts, 
-        // it remembers when it was supposed to go off.
-        await AsyncStorage.setItem('alarm_target_time', triggerTime.toString());
-
-        // 3. Request the OS to schedule a push notification.
-        await Notifications.scheduleNotificationAsync({
-            content: {
-                title: "Time's Up!",
-                body: "Your rest period is over.",
-                sound: true, // Uses the user's default notification sound
-            },
-            // The 'trigger' tells the OS exactly how many seconds to wait.
-            trigger: {
-                type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
-                seconds: seconds
-            },
-        });
-    };
-
 
     if (isLoading) {
         return (
@@ -227,7 +186,14 @@ export default function WorkoutScreen() {
                 <View className="h-[80%]">
                     <ScrollView className="flex-1">
                         {exerciseArray.map((exercise, index) => (
-                            <ExerciseCard key={index} exercise={exercise} isSelected={index === currentExerciseIndex} nextExercise={nextExercise} selectExercise={() => selectExercise(index)} incrementExerciseLimit={incrementExerciseLimit} progressExercise={() => { progressExercise(exercise.id) }} />
+                            <ExerciseCard
+                                key={index}
+                                exercise={exercise}
+                                isSelected={index === currentExerciseIndex}
+                                nextExercise={nextExercise}
+                                selectExercise={() => selectExercise(index)}
+                                progressExercise={() => { progressExercise(exercise.id) }}
+                            />
                         ))}
                     </ScrollView>
                 </View>
