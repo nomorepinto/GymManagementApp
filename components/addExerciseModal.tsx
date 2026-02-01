@@ -43,7 +43,7 @@ export default function AddExerciseModal({
             sets: Number(sets),
             reps: Number(reps),
             targetReps: (Number(reps) >= defaultMaxReps ? defaultMinReps : Number(reps) + 2),
-            targetWeight: Number(weight) + Number(weightIncrease),
+            targetWeight: (Number(reps) >= defaultMaxReps ? (Number(weight) + Number(weightIncrease)) : Number(weight)),
             restTime: Number(restTime),
             weightIncrease: Number(weightIncrease),
             history: []
